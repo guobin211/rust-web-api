@@ -1,0 +1,37 @@
+POST http://localhost:4300/user/register
+Content-Type: application/json
+
+{
+  "username": "test1002",
+  "password": "test1002",
+  "email": "email"
+}
+
+###
+
+GET http://localhost:4300/user/6184f24104fa89693fc1f688
+Accept: application/json
+
+###
+POST http://localhost:4300/user/login
+Content-Type: application/x-www-form-urlencoded
+
+username=test1006&password=test1006
+
+
+###
+GET http://localhost:4300/user?page=1&page_size=10
+Accept: application/json
+
+<> 2021-10-31T190457.200.txt
+
+###
+PUT http://localhost:4300/user/6180d2a3f41928f611903b2a
+Content-Type: application/json
+
+{
+  "username": "111admin",
+  "password": "admin12345",
+  "email": "844922881@qq.com"
+}
+
