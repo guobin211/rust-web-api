@@ -13,7 +13,7 @@ use crate::base::ApiResponse;
 use crate::services::user_doc::UserDocument;
 use crate::AppState;
 
-/// 邮箱注册账号
+/// 邮箱注册表单
 #[derive(Serialize, Deserialize)]
 pub struct RegisterForm {
     pub email: String,
@@ -21,6 +21,10 @@ pub struct RegisterForm {
     pub password: String,
 }
 
+/// 用户注册
+/// @method post
+/// @url /user/register
+/// @body typeof RegisterForm
 #[post("/user/register")]
 pub async fn create_user(
     app_state: web::Data<AppState>,
@@ -34,6 +38,9 @@ pub async fn create_user(
     }
 }
 
+/// 删除用户
+/// @method delete
+/// @url /user/{id}
 #[delete("/user/{id}")]
 pub async fn delete_user(
     app_state: web::Data<AppState>,
@@ -59,6 +66,10 @@ pub struct UserInfo {
     pub token: Option<String>,
 }
 
+/// 更新用户信息
+/// @method put
+/// @url /user/{id}
+/// @body typeof UserInfo
 #[put("/user/{id}")]
 pub async fn update_user(
     app_state: web::Data<AppState>,
@@ -102,6 +113,10 @@ pub struct PageQuery {
     pub page_size: u64,
 }
 
+/// 查询用户列表
+/// @method get
+/// @url /user
+/// @query typeof PageQuery
 #[get("/user")]
 pub async fn find_user_list(
     app_state: web::Data<AppState>,
@@ -115,7 +130,9 @@ pub async fn find_user_list(
     }
 }
 
-/// id查询
+/// 查询单个用户
+/// @method get
+/// @url /user/{id}
 #[get("/user/{id}")]
 pub async fn find_user(
     app_state: web::Data<AppState>,
@@ -187,7 +204,6 @@ pub async fn do_login_by_password(
 
 #[cfg(test)]
 mod tests {
-    use super::*;
 
     #[test]
     fn test_eq() {

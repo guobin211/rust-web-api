@@ -20,6 +20,14 @@ pub struct UserDocument {
     pub token: String,
 }
 
+impl UserDocument {
+    pub fn hidden_props(mut self) -> UserDocument {
+        self.token = "".to_string();
+        self.password = "".to_string();
+        self
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PageResponse<T> {
     total: u64,
@@ -56,6 +64,7 @@ impl UserDocument {
     }
 
     /// mongodb bson action
+    /// mongodb not type safe [如果插入了不同类型的数据,mongodb无法Serialize,查不到数据]
     /// @doc https://docs.mongodb.com/manual/reference/operator/update/positional/
     pub fn update_one(db: &Database, data: &UserDocument) -> Option<UpdateResult> {
         let collection = get_user_collection(db);
@@ -66,7 +75,7 @@ impl UserDocument {
                     "username": data.username.to_string(),
                     "password": data.password.to_string(),
                     "email": data.email.to_string(),
-                    "admin": data.admin.to_string(),
+                    "admin": data.admin,
                     "token": data.token.to_string(),
                 }
             },
@@ -82,8 +91,10 @@ impl UserDocument {
 
     pub fn find_by_id(db: &Database, id: ObjectId) -> Option<UserDocument> {
         let collection = get_user_collection(db);
-        if let Some(user) = collection.find_one(doc! {"_id": id }, None).ok() {
-            return user;
+        if let Some(doc) = collection.find_one(doc! {"_id": id }, None).ok() {
+            if let Some(user) = doc {
+                return Some(user.hidden_props());
+            }
         }
         None
     }
@@ -98,21 +109,19 @@ impl UserDocument {
 
     pub fn find_many(db: &Database, page_query: PageQuery) -> Option<PageResponse<UserDocument>> {
         let collection = get_user_collection(db);
-        let find_option = FindOptions::builder()
-            .sort(doc! {"username": 1})
-            .skip((page_query.page - 1) * page_query.page_size)
-            .limit(page_query.page_size as i64)
-            .build();
+        let mut find_option = FindOptions::default();
+        find_option.sort = Some(doc! {"username": 1});
+        find_option.skip = Some((page_query.page - 1) * page_query.page_size as u64);
+        find_option.limit = Some(page_query.page_size as i64);
         if let Some(total) = collection.count_documents(None, None).ok() {
-            println!("count_documents {:?}", total);
             if let Some(cursor) = collection.find(None, find_option).ok() {
+                println!("find_many has cursor , and count_documents {:?}", total);
                 let mut data = Vec::new();
                 for user in cursor {
                     match user {
-                        Ok(mut user) => {
-                            user.password = "".to_string();
-                            data.push(user);
-                            if data.len() == page_query.page_size as usize {
+                        Ok(user) => {
+                            data.push(user.hidden_props());
+                            if data.len() >= page_query.page_size as usize {
                                 break;
                             }
                         }
@@ -125,5 +134,29 @@ impl UserDocument {
             }
         }
         None
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::base::AppConfig;
+
+    use super::*;
+
+    #[test]
+    fn test_find_many() {
+        if let Some(db) = AppConfig::new().get_database() {
+            if let Some(res) = UserDocument::find_many(
+                &db,
+                PageQuery {
+                    page: 1,
+                    page_size: 10,
+                },
+            ) {
+                assert!(res.total > 0);
+                assert!(res.data.len() > 0);
+                assert!(res.total >= res.data.len() as u64);
+            }
+        }
     }
 }

@@ -4,19 +4,12 @@
 
 ## API Designed
 
+### User
+
 ``` 
-   login<post>
-   addTodo<post>
-   deleteTodo<post | delete>
-   updateTodo<post>
-   findTodo<get>
-   findTodoList<get>
-```
-
-## User
-
-```  
-  post /user/login
-  body username="" password=""  
-     
+   POST     /user/register
+   DELETE   /user/{id}
+   UPDATE   /user/{id}
+   GET      /user/{id}
+   GET      /user
 ```

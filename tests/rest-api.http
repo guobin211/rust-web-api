@@ -1,3 +1,8 @@
+GET http://localhost:4300/todo
+Accept: application/json
+Authorization: eyJhbGciOiJIUzI1NiJ9.eyJ0ZXN0MTAxMiI6InRlc3QxMDEyIn0.eCCzg8mmvbVcVy3JhGBXEDgqf48ZwzK-_aA8DEMgrfY
+
+###
 POST http://localhost:4300/user/register
 Content-Type: application/json
 
@@ -9,14 +14,14 @@ Content-Type: application/json
 
 ###
 
-GET http://localhost:4300/user/6184f24104fa89693fc1f688
+GET http://localhost:4300/user/618540f2a2040110cc63c813
 Accept: application/json
 
 ###
 POST http://localhost:4300/user/login
 Content-Type: application/x-www-form-urlencoded
 
-username=test1006&password=test1006
+username=test1012&password=test1012
 
 
 ###

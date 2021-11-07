@@ -1,5 +1,6 @@
 use std::env;
 
+use mongodb::sync::{Client, Database};
 use serde::{Deserialize, Serialize};
 
 #[allow(dead_code)]
@@ -11,11 +12,23 @@ pub struct AppConfig {
 
 impl AppConfig {
     pub fn new() -> AppConfig {
+        let port = env::var("APP_PORT").unwrap_or("4300".to_string());
+        let mongodb_uri =
+            env::var("MONGODB_URI").unwrap_or("mongodb://localhost:27017".to_string());
+        let mongodb_database = env::var("MONGODB_DATABASE").unwrap_or("todo-app".to_string());
         AppConfig {
-            port: env::var("APP_PORT").unwrap_or("4300".to_string()),
-            mongodb_uri: env::var("MONGODB_URI").unwrap_or("mongodb://localhost:27017".to_string()),
-            mongodb_database: env::var("MONGODB_DATABASE").unwrap_or("todo-app".to_string()),
+            port,
+            mongodb_uri,
+            mongodb_database,
         }
+    }
+
+    pub fn get_database(&self) -> Option<Database> {
+        if let Ok(client) = Client::with_uri_str(self.mongodb_uri.as_str()) {
+            let db = client.database(self.mongodb_database.as_str());
+            return Some(db);
+        }
+        None
     }
 }
 
